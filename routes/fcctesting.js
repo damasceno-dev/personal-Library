@@ -51,11 +51,14 @@ module.exports = function (app) {
     });
 
   app.get('/_api/get-tests', cors(), function(req, res, next){
+    
     console.log('requested');
-    if(process.env.NODE_ENV === 'test') return next();
+    if(process.env.NODE_ENV === 'test') 
+      return next();
     res.json({status: 'unavailable'});
   },
   function(req, res, next){
+    console.log(runner.report, req.query)
     if(!runner.report) return next();
     res.json(testFilter(runner.report, req.query.type, req.query.n));
   },

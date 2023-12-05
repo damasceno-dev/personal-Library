@@ -13,7 +13,7 @@ const server = require('../server');
 
 chai.use(chaiHttp);
 
-//suite('Functional Tests', function() {
+suite('Functional Tests', function() {
   /*
   * ----[EXAMPLE TEST]----
   * Each test should completely test the response of the API end-point including response status code!
@@ -28,19 +28,20 @@ chai.use(chaiHttp);
   //assert.property(res.body[0], 'title', 'Books in array should contain title');
   //assert.property(res.body[0], '_id', 'Books in array should contain _id');
   //done();
-  //});
-//});
+  //});  
   /*
   * ----[END of EXAMPLE TEST]----
   */
 
+
   suite('Routing tests', function() {
-  this.timeout(15000);
+  this.timeout(10000);
 
     suite('POST /api/books with title => create book object/expect book object', function() {
-      
+
       test('Test POST /api/books with title', function(done) {
          chai.request(server)
+          .keepOpen()
           .post('/api/books')
            .send({
              "title": "The Unforgettable Master",
@@ -54,10 +55,11 @@ chai.use(chaiHttp);
             assert.isNotEmpty(res.body._id)
             done();
           });
-      });
-      
+      }).timeout(15000);
+
       test('Test POST /api/books with no title given', function(done) {
          chai.request(server)
+          .keepOpen()
           .post('/api/books')
           .end(function(err, res){
             assert.equal(res.status, 200);
@@ -65,14 +67,15 @@ chai.use(chaiHttp);
             done();
           });
       });
-      
+
     });
 
     suite('GET /api/books => array of books', function(){
-      
+
       test('Test GET /api/books',  function(done){
         chai
           .request(server)
+          .keepOpen()
           .get('/api/books/')
           .end(function(err, res) {
             assert.equal(res.status, 200);
@@ -84,14 +87,12 @@ chai.use(chaiHttp);
               assert.property(book, 'title', 'required property for each issue');
             });
             done();
-      });      
-      
-    });
-
+          });      
+      });
     })
-    
+
     suite('GET /api/books/[id] => book object with [id]', function(){
-      
+
       test('Test GET /api/books/[id] with id not in db',  function(done){
         const invalidId = "000000000000000000000000"
         chai
@@ -101,10 +102,10 @@ chai.use(chaiHttp);
           .end(function(err, res) {
             assert.equal(res.status, 200);
             assert.equal(res.text, '"no book exists"');
+            done();
           });
-        done();
       });
-      
+
       test('Test GET /api/books/[id] with valid id in db',  function(done){
         chai
           .request(server)
@@ -119,6 +120,7 @@ chai.use(chaiHttp);
 
             chai
               .request(server)
+              .keepOpen()
               .get('/api/books/' + justCreatedId)
               .end(function(err, res) {
                 assert.equal(res.status, 200);
@@ -127,11 +129,11 @@ chai.use(chaiHttp);
               });
           });
       });
-      
+
     });
 
     suite('POST /api/books/[id] => add comment/expect book object with id', function(){
-      
+
       test('Test POST /api/books/[id] with comment', function(done){
         chai
           .request(server)
@@ -144,6 +146,7 @@ chai.use(chaiHttp);
 
             chai
               .request(server)
+              .keepOpen()
               .post('/api/books/' + lastElement._id)
                .send({
                  "comment": "comment post test",
@@ -168,6 +171,7 @@ chai.use(chaiHttp);
 
             chai
               .request(server)
+              .keepOpen()
               .post('/api/books/' + lastElement._id)
               .end(function(err, res) {
                 assert.equal(res.status, 200);
@@ -183,13 +187,16 @@ chai.use(chaiHttp);
           .request(server)
           .keepOpen()
           .post('/api/books/' + invalidId)
+          .send({
+             "comment": "comment post test",
+           })
           .end(function(err, res) {
             assert.equal(res.status, 200);
             assert.equal(res.text, '"no book exists"');
+            done();
           });
-        done();
       });
-      
+
     });
 
     suite('DELETE /api/books/[id] => delete book object id', function() {
@@ -207,6 +214,7 @@ chai.use(chaiHttp);
 
             chai
               .request(server)
+              .keepOpen()
               .delete('/api/books/' + lastElement._id)
               .end(function(err, res) {
                 assert.equal(res.status, 200);
@@ -214,6 +222,7 @@ chai.use(chaiHttp);
 
                 chai
                   .request(server)
+                  .keepOpen()
                   .get(`/api/books/${lastElement._id}`)
                   .end((err, res) => {
                     assert.equal(res.status, 200);
@@ -228,6 +237,7 @@ chai.use(chaiHttp);
               const invalidId = "000000000000000000000000"
               chai
                 .request(server)
+                .keepOpen()
                 .get(`/api/books/${invalidId}`)
                 .end((err, res) => {
                   assert.equal(res.status, 200);
@@ -237,6 +247,8 @@ chai.use(chaiHttp);
           });
 
     });
-
+    
   });
+});
+
 

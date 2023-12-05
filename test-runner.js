@@ -79,6 +79,7 @@ emitter.run = function() {
 
     })
     .on('suite end', function(s) {
+
       context = context.slice(0, -(s.title.length + separator.length))
     })
   } catch(e) {
